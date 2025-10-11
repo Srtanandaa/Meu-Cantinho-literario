@@ -113,7 +113,7 @@ useEffect(() => {
 
         <TouchableOpacity
           style={styles.statusBox}
-          onPress={() => navigation.navigate("Home", { filtro: "quero ler" })}
+          onPress={() => navigation.navigate("Home", { filtro: "Quero Ler" })}
         >
           <MaterialCommunityIcons name="book-plus-multiple" size={30} color="#600" />
           <Text style={styles.statusText}>Quero Ler</Text>

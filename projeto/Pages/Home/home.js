@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, FlatList, TouchableOpacity, ScrollView, Image } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native"; 
+import { SafeAreaView } from "react-native-safe-area-context";
 import { db, auth } from "../../firebaseConfig";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import styles from "./styles";
@@ -19,12 +20,11 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const currentUser = auth.currentUser;
-    setUser(currentUser);
     if (!currentUser) return;
+    setUser(currentUser);
 
     const filtroInicial = route.params?.filtro
-      ? 
-        route.params.filtro.charAt(0).toUpperCase() + route.params.filtro.slice(1)
+      ? route.params.filtro.charAt(0).toUpperCase() + route.params.filtro.slice(1)
       : "Todos";
 
     setFiltro(filtroInicial);
@@ -33,58 +33,48 @@ export default function HomeScreen() {
   }, [route.params]);
 
   const buscarLivros = (statusFiltro, currentUser) => {
-    let livrosRef = collection(db, "usuarios", currentUser.uid, "livros");
-    let q =
-      statusFiltro === "Todos"
-        ? livrosRef
-        : query(livrosRef, where("status", "==", statusFiltro));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const lista = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const livrosRef = collection(db, "usuarios", currentUser.uid, "livros");
+    const q = statusFiltro === "Todos" ? livrosRef : query(livrosRef, where("status", "==", statusFiltro));
+    return onSnapshot(q, (snapshot) => {
+      const lista = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data(), userId: currentUser.uid }));
       setLivros(lista);
       setLivrosOriginais(lista);
     });
-    return unsubscribe;
   };
 
-  const generosUnicos = [...new Set(livrosOriginais.map(livro => livro.genero))].filter(Boolean);
+  const generosUnicos = [...new Set(livrosOriginais.map(l => l.genero).filter(Boolean))];
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => navigation.navigate("Detalhes do livro", { livro: item })}
+    >
       {item.imagem ? (
         <Image source={{ uri: item.imagem }} style={styles.capa} />
       ) : (
         <View style={styles.placeholder}><Text>📖</Text></View>
       )}
-      <Text numberOfLines={1} style={styles.tituloLivro}>{item.titulo}</Text>
-      <Text numberOfLines={1} style={styles.autorLivro}>{item.autor}</Text>
+      <Text numberOfLines={1} style={styles.tituloLivro}>{item.titulo || "Sem título"}</Text>
+      <Text numberOfLines={1} style={styles.autorLivro}>{item.autor || "Autor desconhecido"}</Text>
     </TouchableOpacity>
   );
 
   const livrosFiltrados = livros.filter(
     (livro) =>
-      livro.titulo.toLowerCase().includes(buscar.toLowerCase()) ||
-      livro.autor.toLowerCase().includes(buscar.toLowerCase())
+      (livro.titulo || "").toLowerCase().includes(buscar.toLowerCase()) ||
+      (livro.autor || "").toLowerCase().includes(buscar.toLowerCase())
   );
 
   const filtrarPorGenero = (generoSelecionado) => {
-    if (!generoSelecionado) {
-      setLivros(livrosOriginais);
-    } else {
-      const filtrados = livrosOriginais.filter(livro => livro.genero === generoSelecionado);
-      setLivros(filtrados);
-    }
+    if (!generoSelecionado) setLivros(livrosOriginais);
+    else setLivros(livrosOriginais.filter(l => l.genero === generoSelecionado));
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 120 }}
-        style={styles.container}
-      >
+    <SafeAreaView style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 120 }} style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.fraseTopo}>
-            Um livro por dia, {"\n"}uma nova aventura
-          </Text>
+          <Text style={styles.fraseTopo}>Um livro por dia, {"\n"}uma nova aventura</Text>
           <Image source={require("../../assets/Imagem.png")} style={styles.ilustracao} />
         </View>
 
@@ -155,13 +145,11 @@ export default function HomeScreen() {
         <TouchableOpacity style={styles.itemNavegacao}>
           <MaterialCommunityIcons name="bookshelf" size={30} color="#600" />
         </TouchableOpacity>
-        
         <View style={styles.separador} />
-
         <TouchableOpacity style={styles.itemNavegacao} onPress={() => navigation.navigate("perfil")}>
           <Ionicons name="person-circle" size={30} color="#600" />
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

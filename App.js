@@ -8,6 +8,7 @@ import LoginScreen from './projeto/Pages/Login/login';
 import HomeScreen from './projeto/Pages/Home/home';
 import AddBookScreen from './projeto/Pages/AddBookScreen/addbook'
 import PerfilScreen from './projeto/Pages/Perfil/perfil';
+import DetalhesLivros from './projeto/Pages/DetalhesLivros/detalheslivros'
 
 
 const Stack = createStackNavigator();
@@ -22,6 +23,7 @@ export default function App() {
         <Stack.Screen name="Home" component= {HomeScreen}/>
         <Stack.Screen name="perfil" component={PerfilScreen} />
         <Stack.Screen name= "Cadastrar livro" component={AddBookScreen}/>
+        <Stack.Screen name="Detalhes do livro" component={DetalhesLivros} />
 
       </Stack.Navigator>
     </NavigationContainer>
