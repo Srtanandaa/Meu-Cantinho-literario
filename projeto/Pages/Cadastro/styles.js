@@ -45,6 +45,21 @@ const styles = StyleSheet.create({
     alignItems: "center", 
     marginBottom: 20
   },
+
+  
+  inputWrapper: {
+  position: 'relative',
+  width: '100%',
+},
+
+iconButton: {
+  position: 'absolute',
+  right: 12, 
+  top: '35%',
+  transform: [{ translateY: -12 }],
+  zIndex: 1,
+},
+
   button: { 
     height: 50, 
     borderRadius: 14, 

@@ -39,6 +39,20 @@ const styles = StyleSheet.create({
     marginBottom: 15, 
   },
 
+  inputWrapper: {
+  position: 'relative',
+  width: '100%',
+},
+
+iconButton: {
+  position: 'absolute',
+  right: 12, 
+  top: '35%',
+  transform: [{ translateY: -12 }],
+  zIndex: 1,
+},
+
+
   passwordRow: { 
     flexDirection: "row", 
     alignItems: "center", 

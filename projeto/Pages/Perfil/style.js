@@ -16,7 +16,7 @@ export default StyleSheet.create({
 
   perfilContainer: {
     alignItems: "center",
-    marginTop: 40,
+    marginTop: 25,
   },
 
   nome: {
@@ -61,7 +61,7 @@ export default StyleSheet.create({
   alignItems: "center",
   marginTop: 20,
   flexDirection: "column",
-  width: "80%", 
+  width: "90%", 
   alignSelf: "center",
 },
 
@@ -90,7 +90,7 @@ autorBox: {
   alignItems: "center",
   marginTop: 20,
   flexDirection: "column",
-  width: "80%", 
+  width: "90%", 
   alignSelf: "center",
   },
 
@@ -119,14 +119,15 @@ autorBox: {
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 12,
-    marginTop: 30,
-    marginLeft: 45,
-    marginRight: 45,
+    marginTop: 20,
+    marginLeft: 20,
+    marginRight: 20,
   },
 
   addMetaButtonText: {
     color: "#600",
     fontWeight: "bold",
+    width: "90%",
     fontSize: 16,
     marginLeft: 10,
   },
@@ -148,10 +149,12 @@ autorBox: {
 
   input: {
     width: "100%",
-    backgroundColor: "#fff",
+    backgroundColor: "#ffd6d6",
     padding: 10,
     borderRadius: 10,
     marginBottom: 15,
+    borderWidth: 1,
+    
   },
 
    botoesContainer: {
@@ -198,9 +201,10 @@ autorBox: {
   },
 
   botaoLogout: {
-  position: "absolute",
-  bottom: 70,   
-  right: 20,
+   position: "absolute",
+  top: 40,        
+  right: 20,     
+  zIndex: 10,    
 },
 
 

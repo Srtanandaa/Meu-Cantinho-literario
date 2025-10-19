@@ -11,6 +11,7 @@ import {
   View 
 } from "react-native";
 import styles from '../Cadastro/styles'; 
+import { Ionicons } from '@expo/vector-icons';
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../firebaseConfig"; 
 import { setDoc, doc } from "firebase/firestore"; 
@@ -121,13 +122,25 @@ export default function CadastroScreen({ navigation }) {
 
         <Text style={styles.label}>Senha</Text>
         <View style={styles.passwordRow}>
-          <TextInput
-            style={[styles.input, { flex: 1 }]}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            placeholder="••••••••"
-          />
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input} 
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              placeholder="••••••••"
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.iconButton}
+            >
+              <Ionicons
+                name={showPassword ? "eye-off-outline" : "eye-outline"}
+                size={24}
+                color="#661414"
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <TouchableOpacity

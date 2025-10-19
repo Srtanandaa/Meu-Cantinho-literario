@@ -5,11 +5,10 @@ import {
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { Ionicons } from "@expo/vector-icons";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system/legacy";  
+import * as FileSystem from "expo-file-system";
 import { db, auth } from "../../firebaseConfig";
-import { setDoc, doc, Timestamp } from "firebase/firestore"; 
+import { doc, setDoc, updateDoc, Timestamp, collection, addDoc } from "firebase/firestore"; 
 import { onAuthStateChanged } from "firebase/auth";
 
 import styles from "./styles"; 
@@ -23,16 +22,22 @@ function formatarDataParaYYYYMMDD(data) {
   return data;
 }
 
-export default function AddBookScreen({ navigation }) {
-  const [titulo, setTitulo] = useState("");
-  const [autor, setAutor] = useState("");
-  const [status, setStatus] = useState("Quero Ler");
-  const [dataLancamento, setDataLancamento] = useState(""); 
-  const [numPaginas, setNumPaginas] = useState(""); 
-  const [avaliacao, setAvaliacao] = useState(0); 
-  const [avaliacaoEscrita, setAvaliacaoEscrita] = useState("");
+export default function AddBookScreen({ route, navigation }) {
+  const livroParaEditar = route.params?.livroParaEditar;
+
+  const [titulo, setTitulo] = useState(livroParaEditar?.titulo || "");
+  const [autor, setAutor] = useState(livroParaEditar?.autor || "");
+  const [status, setStatus] = useState(livroParaEditar?.status || "Quero Ler");
+  const [dataLancamento, setDataLancamento] = useState(
+    livroParaEditar?.dataLancamento ? livroParaEditar.dataLancamento : ""
+  ); 
+  const [numPaginas, setNumPaginas] = useState(
+    livroParaEditar?.numPaginas ? livroParaEditar.numPaginas.toString() : ""
+  ); 
+  const [avaliacao, setAvaliacao] = useState(livroParaEditar?.avaliacao || 0); 
+  const [avaliacaoEscrita, setAvaliacaoEscrita] = useState(livroParaEditar?.avaliacaoEscrita || "");
   const [loading, setLoading] = useState(false);
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState(livroParaEditar?.imagem || null);
   const [user, setUser] = useState(null);
 
   const [open, setOpen] = useState(false);
@@ -42,7 +47,7 @@ export default function AddBookScreen({ navigation }) {
     { label: "Lido", value: "Lido" },
   ]);
 
-  const [genero, setGenero] = useState(null);
+  const [genero, setGenero] = useState(livroParaEditar?.genero || null);
   const [generoOutros, setGeneroOutros] = useState("");
   const [openGenero, setOpenGenero] = useState(false);
   const [itemsGenero, setItemsGenero] = useState([
@@ -109,68 +114,61 @@ export default function AddBookScreen({ navigation }) {
     setDataLancamento(formattedText);
   };
 
-  const handleAddBook = async () => {
-    if (!titulo || !autor || !genero) {
-      Alert.alert("Erro", "Preencha título, autor e gênero!");
-      return;
+ const salvarLivro = async () => {
+  if (!titulo || !autor || !genero || !numPaginas) {
+    Alert.alert("Erro", "Preencha título, autor, gênero e número de páginas!");
+    return;
+  }
+  if (!user) {
+    Alert.alert("Erro", "Usuário não autenticado.");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    let localImageUri = image;
+
+    if (image && !image.startsWith("file://")) {
+      const fileName = `${Date.now()}_${titulo}.jpg`;
+      const dest = FileSystem.documentDirectory + fileName;
+      await FileSystem.copyAsync({ from: image, to: dest });
+      localImageUri = dest;
     }
 
-    if (!user) {
-      Alert.alert("Erro", "Usuário não autenticado.");
-      return;
+    const livroData = {
+      titulo,
+      autor,
+      status,
+      genero: genero === "Outros" ? generoOutros : genero,
+      dataLancamento: formatarDataParaYYYYMMDD(dataLancamento),
+      numPaginas: parseInt(numPaginas, 10),
+      avaliacao: status === "Lido" ? avaliacao : 0,
+      avaliacaoEscrita: status === "Lido" ? avaliacaoEscrita : "",
+      imagem: localImageUri,
+      criadoEm: Timestamp.now(),
+    };
+
+    if (livroParaEditar) {
+      const livroRef = doc(db, "usuarios", user.uid, "livros", livroParaEditar.id);
+      await updateDoc(livroRef, livroData);
+      Alert.alert("Sucesso", "Livro atualizado!");
+    } else {
+      const livrosRef = collection(db, "usuarios", user.uid, "livros");
+      await addDoc(livrosRef, livroData);
+      Alert.alert("Sucesso", "Livro cadastrado!");
     }
 
-    setLoading(true);
+    navigation.navigate("Home");
 
-    try {
-      let localImageUri = null;
+  } catch (error) {
+    console.log("Erro Firebase:", error);
+    Alert.alert("Erro", "Não foi possível salvar o livro. Tente novamente.");
+  } finally {
+    setLoading(false);
+  }
+};
 
-      if (image) {
-        const fileName = `${Date.now()}_${titulo}.jpg`;
-        const dest = FileSystem.documentDirectory + fileName;
-        await FileSystem.copyAsync({ from: image, to: dest }); 
-        localImageUri = dest;
-      }
-
-      const livro = {
-        titulo,
-        autor,
-        status,
-        genero: genero === "Outros" ? generoOutros : genero,
-        dataLancamento: formatarDataParaYYYYMMDD(dataLancamento),
-        numPaginas: numPaginas || null,
-        avaliacao: status === "Lido" ? avaliacao : 0,
-        avaliacaoEscrita: status === "Lido" ? avaliacaoEscrita : "",
-        imagem: localImageUri,
-        criadoEm: Timestamp.now(),
-      };
-
-      const livroRef = doc(db, "usuarios", user.uid, "livros", `${Date.now()}`);
-      await setDoc(livroRef, livro);
-
-      Alert.alert("Sucesso", `Livro "${titulo}" adicionado!`);
-
-      
-      setTitulo("");
-      setAutor("");
-      setStatus("Quero Ler");
-      setGenero(null);
-      setGeneroOutros("");
-      setDataLancamento("");
-      setNumPaginas("");
-      setAvaliacao(0);
-      setAvaliacaoEscrita("");
-      setImage(null);
-
-      navigation.goBack();
-
-    } catch (error) {
-      console.log("Erro Firebase:", error);
-      Alert.alert("Erro", "Não foi possível adicionar o livro. Tente novamente.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <KeyboardAvoidingView
@@ -317,17 +315,17 @@ export default function AddBookScreen({ navigation }) {
             </>
           )}
 
-          <TouchableOpacity
-            style={styles.button}
-            onPress={handleAddBook}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Adicionar Livro</Text>
-            )}
-          </TouchableOpacity>
+         <TouchableOpacity
+        style={[styles.button, { marginTop: 20 }]}
+        onPress={salvarLivro}
+      >
+        {loading ? <ActivityIndicator color="#fff" /> : 
+          <Text style={styles.buttonText}>
+            {livroParaEditar ? "Salvar Alterações" : "Adicionar Livro"}
+          </Text>
+        }
+      </TouchableOpacity>
+
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

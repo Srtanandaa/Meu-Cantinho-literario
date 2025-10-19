@@ -7,9 +7,12 @@ import {
   Text, 
   TextInput, 
   TouchableOpacity, 
-  View 
+  View,
+  Keyboard,
+  TouchableWithoutFeedback
 } from "react-native";
 import styles from '../Login/styles'; 
+import { Ionicons } from '@expo/vector-icons';
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebaseConfig"; 
 
@@ -62,12 +65,13 @@ export default function LoginScreen({ navigation }) {
     }
   }
 
-  return (
-    <ImageBackground
-      source={require("../../assets/fundo2.png")} 
-      style={styles.background}
-      resizeMode="cover" 
-    >
+return (
+  <ImageBackground
+    source={require("../../assets/fundo2.png")} 
+    style={styles.background}
+    resizeMode="cover" 
+  >
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
         style={styles.content}        
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -86,13 +90,25 @@ export default function LoginScreen({ navigation }) {
 
         <Text style={styles.label}>Senha</Text>
         <View style={styles.passwordRow}>
-          <TextInput
-            style={[styles.input, { flex: 1 }]}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            placeholder="••••••••"
-          />
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input} 
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              placeholder="••••••••"
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.iconButton}
+            >
+              <Ionicons
+                name={showPassword ? "eye-off-outline" : "eye-outline"}
+                size={24}
+                color="#661414"
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <TouchableOpacity
@@ -112,6 +128,7 @@ export default function LoginScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
-    </ImageBackground>
-  );
+    </TouchableWithoutFeedback>
+  </ImageBackground>
+);
 }

@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, FlatList, TouchableOpacity, ScrollView, Image } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native"; 
-import { SafeAreaView } from "react-native-safe-area-context";
 import { db, auth } from "../../firebaseConfig";
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, orderBy, } from "firebase/firestore";
 import styles from "./styles";
 
 const filtros = ["Todos", "Lendo", "Lido", "Quero Ler"];
@@ -39,6 +38,20 @@ export default function HomeScreen() {
       const lista = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data(), userId: currentUser.uid }));
       setLivros(lista);
       setLivrosOriginais(lista);
+
+      let q;
+  if (statusFiltro === "Todos") {
+    q = query(livrosRef, orderBy("criadoEm", "desc")); 
+  } else {
+    q = query(livrosRef, where("status", "==", statusFiltro), orderBy("criadoEm", "desc"));
+  }
+
+  return onSnapshot(q, (snapshot) => {
+    const lista = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data(), userId: currentUser.uid }));
+    setLivros(lista);
+    setLivrosOriginais(lista);
+     });
+      
     });
   };
 
@@ -70,8 +83,10 @@ export default function HomeScreen() {
     else setLivros(livrosOriginais.filter(l => l.genero === generoSelecionado));
   };
 
+  
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }} style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.fraseTopo}>Um livro por dia, {"\n"}uma nova aventura</Text>
@@ -150,6 +165,6 @@ export default function HomeScreen() {
           <Ionicons name="person-circle" size={30} color="#600" />
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
