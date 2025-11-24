@@ -5,6 +5,26 @@ Ele funciona como uma biblioteca digital completa, permitindo ao usuário cadast
 
 ---
 
+## 🖼️ Prévia do App
+
+### 🔐 **Login & Principal**
+| Login | Principal |
+|-------|-----------|
+| <img src="./assets/imagens-App/home.jpg" width="150"/> | <img src="./assets/imagens-App/principal.jpg" width="150"/> |
+
+### 📘 **Descrição do Livro**
+| Livro 1 | Livro 2 | Livro 3 |
+|---------|---------|---------|
+| <img src="./assets/imagens-App/livro.jpg" width="150"/> | <img src="./assets/imagens-App/livro2.jpg" width="150"/> | <img src="./assets/imagens-App/livro3.jpg" width="150"/> |
+
+### 📝 **Cadastro & Perfil**
+| Cadastro | Perfil |
+|----------|--------|
+| <img src="./assets/imagens-App/cadastro.jpg" width="150"/> | <img src="./assets/imagens-App/perfil.jpg" width="150"/> |
+---
+
+---
+
 ## ✨ Principais Funcionalidades
 
 ---
